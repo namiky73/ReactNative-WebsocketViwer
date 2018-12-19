@@ -2,12 +2,11 @@
 
 import React, { Component } from 'react';
 import { Alert,AppRegistry, Animated,StyleSheet, 
-  Text, View, Image, Button, PanResponder,TextInput  } from 'react-native';
+  Text, View, Image, Button, PanResponder,TextInput, StatusBar  } from 'react-native';
 import SafeAreaView from 'react-native-safe-area-view';
+import { createResponder } from 'react-native-gesture-responder'
 
 const CIRCLE_RADIUS = 36;
-const R_outer = 6;
-const R_inner = 2;
 const styles = StyleSheet.create({
   bigblue: {
     color: 'blue',
@@ -18,23 +17,16 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   circle      : {
-    backgroundColor: 'rgba(20,200,20,0.2)',
-    width               : CIRCLE_RADIUS*R_inner,
-    height              : CIRCLE_RADIUS*R_inner,
-    borderRadius        : CIRCLE_RADIUS*R_inner/2
-  },
-  circle_r     : {
-    backgroundColor: 'rgba(20,200,20,0.8)',
-    width               : CIRCLE_RADIUS*R_inner,
-    height              : CIRCLE_RADIUS*R_inner,
-    borderRadius        : CIRCLE_RADIUS*R_inner/2,
-    position: 'absolute' ,
+    backgroundColor     : '#1abc9c',
+    width               : CIRCLE_RADIUS*2,
+    height              : CIRCLE_RADIUS*2,
+    borderRadius        : CIRCLE_RADIUS*1
   },
   outer_circle      : {
     // backgroundColor     : '#1abc9c',
-    width               : CIRCLE_RADIUS*R_outer,
-    height              : CIRCLE_RADIUS*R_outer,
-    borderRadius        : CIRCLE_RADIUS*R_outer/2,
+    width               : CIRCLE_RADIUS*6,
+    height              : CIRCLE_RADIUS*6,
+    borderRadius        : CIRCLE_RADIUS*3,
     borderColor         : '#1abc9c',
     borderWidth:1,
     alignItems:'center',
@@ -77,7 +69,7 @@ export default class AppView extends Component {
         this.state.pan.setValue({x: 0, y: 0});
         Animated.spring(
           this.state.scale,
-          { toValue: 1.0, friction: 3 }
+          { toValue: 1.1, friction: 3 }
         ).start();
       },
 
@@ -88,24 +80,14 @@ export default class AppView extends Component {
 
       // https://stackoverflow.com/questions/36637321/pass-an-anonymous-function-to-onpanrespondermove
       onPanResponderMove: (e, gestureState) => {
-        // console.log(this.state.pan);
-        const tmp_x = this.state.pan.x._value;
-        const tmp_y = this.state.pan.y._value;
-        const dist = tmp_x*tmp_x + tmp_y*tmp_y;
-        const R_square = CIRCLE_RADIUS*CIRCLE_RADIUS*R_outer*R_outer/4;
-        console.log(dist, R_square);
-        if( dist > R_square ){
-          const rate = Math.sqrt(R_square / dist);
-          this.setState({
-            top: tmp_y*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2, 
-            left: tmp_x*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2
-          });   
-        }
-        else{
-          this.setState({top: this.state.pan.y._value+CIRCLE_RADIUS*(R_outer-R_inner)/2, 
-            left: this.state.pan.x._value+CIRCLE_RADIUS*(R_outer-R_inner)/2});
-        }
+        console.log(this.state.pan);
+        // if(this.state.pan.x > 50){
+        // this.state.pan.setValue({x: 10});
+        // }
+        // this.state.pan.setValue({x: 10});
         this.state.pan.flattenOffset();
+
+        this.state.pan.setValue({x: 10, y: 10});
         Animated.event([null, {
           dx: this.state.pan.x,
           dy: this.state.pan.y,
@@ -124,9 +106,7 @@ export default class AppView extends Component {
         // Flatten the offset to avoid erratic behavior
         this.state.pan.flattenOffset();
         this.state.pan.setValue({x: 0, y: 0});
-        this.setState({top: CIRCLE_RADIUS*(R_outer-R_inner)/2, 
-          left: CIRCLE_RADIUS*(R_outer-R_inner)/2});
-        this.se
+
         Animated.spring(
           this.state.scale,
           { toValue: 1, friction: 3 }
@@ -139,8 +119,6 @@ export default class AppView extends Component {
     super(props);
     this.sock = new WebSocket('ws://192.168.0.24:8000');
     this.state = { 
-      top:CIRCLE_RADIUS*(R_outer-R_inner)/2,
-      left:CIRCLE_RADIUS*(R_outer-R_inner)/2,
       pan: new Animated.ValueXY(),
       scale: new Animated.Value(1),
       connectedText: 'no', 
@@ -184,12 +162,13 @@ export default class AppView extends Component {
           </View>
           <View style={{flex:2, alignItems:'center'}}>
             <View style={styles.outer_circle}>
-              <View style={[styles.circle_r, {top: this.state.top, left: this.state.left}]}></View>
               <Animated.View {...this._panResponder.panHandlers} style={imageStyle}>
                 <View style={styles.circle}></View>
-              </Animated.View>           
+              </Animated.View>
             </View>
           </View>
+          <View style={[styles.circle, styles.circle_m]}></View>
+
         </View>
       </View>
       </SafeAreaView>
