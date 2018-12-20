@@ -11,6 +11,7 @@ export default class AppView extends Component {
     // Alert.alert('You tapped the button!');
     this.sock = new WebSocket(this.state.ipAddrText);
 
+    console.log('aaaaa');
     // https://qiita.com/KeyG/items/307ffbe688e45e6dd413
     this.sock.addEventListener('open',function(e){
       this.sock.send("from react native!");
@@ -49,9 +50,10 @@ export default class AppView extends Component {
         // console.log(dist, R_square);
         if( dist > R_square ){
           const rate = Math.sqrt(R_square / dist);
+          // if use float, very slow...
           this.setState({
-            top: tmp_y*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2, 
-            left: tmp_x*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2
+            top: Math.floor(tmp_y*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2), 
+            left: Math.floor(tmp_x*rate + CIRCLE_RADIUS*(R_outer-R_inner)/2)
           });   
         }
         else{
@@ -79,7 +81,6 @@ export default class AppView extends Component {
         this.state.pan.setValue({x: 0, y: 0});
         this.setState({top: CIRCLE_RADIUS*(R_outer-R_inner)/2, 
           left: CIRCLE_RADIUS*(R_outer-R_inner)/2});
-        this.se
         Animated.spring(
           this.state.scale,
           { toValue: 1, friction: 3 }
@@ -92,10 +93,13 @@ export default class AppView extends Component {
     const modified_x = this.state.left - CIRCLE_RADIUS*(R_outer-R_inner)/2;
     const modified_y = this.state.top - CIRCLE_RADIUS*(R_outer-R_inner)/2;
     const vals = {x: modified_x, y: modified_y*(-1)};
+    if(modified_x == 0.0 && modified_y == 0.0){
+      return;
+    }
     if(this.sock.readyState == WebSocket.OPEN){
       // send data
       const json_data = JSON.stringify(vals);
-      this.sock.send(json_data);
+      // this.sock.send(json_data);
     }
     else{
       // 
